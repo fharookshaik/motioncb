@@ -1,0 +1,31 @@
+# Data and label-curation settings. Changing anything here creates a new label
+# version: bump `label_version` and record the reason in docs/decisions.md.
+
+label_version: v1
+
+raw:
+  release: V20260203
+  polygons: data/raw/V20260203/gpkg/Solar_Energy_Polygons_V20260203.gpkg
+  records: data/raw/V20260203/csv/Solar_Energy_V20260203.csv
+  # Optional, for test set T-new (download from https://zenodo.org/records/16942382)
+  previous_polygons: data/raw/V20250101/gpkg/Solar_Energy_Polygons_V20250101.gpkg
+
+crs:
+  equal_area: 3035        # all area / distance statistics and the split grid
+
+imagery_window:            # reference Sentinel-2 composite period
+  start: "2025-04-01"
+  end: "2025-09-30"
+  commissioning_buffer_months: 3   # registration-vs-construction lag
+
+labels:
+  ignore_area_accuracy_2: true     # low-res mapped polygons -> ignore (ablation F flips this)
+  ignore_unlinked: true            # area_related == 0 -> ignore (ablation F flips this)
+  keep_outside_germany: true       # decision 2026-11-03: polygons located in Denmark stay in (flagged only)
+  germany_lat_max: 55.06           # used only to FLAG them; flags 3 (Zealand, Bornholm, Laesoe area)
+  large_scale_min_ha: 1.0          # primary evaluation subset
+  size_bins_ha: [0, 0.1, 0.5, 1, 2, 5, 10, 20, 50, 100, 100000]
+
+outputs:
+  labels: data/interim/labels_{label_version}.gpkg
+  labels_report: data/interim/labels_{label_version}_report.json

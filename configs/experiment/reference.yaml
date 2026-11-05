@@ -1,0 +1,63 @@
+# Reference configuration (the anchor every ablation arm differs from in ONE way).
+# Freeze after the pilot (ROADMAP M6). Any later change = new reference version
+# and ALL completed arms must be re-run; log it in docs/decisions.md.
+
+reference_version: r1
+
+imagery:
+  sensor: s2_l2a
+  bands: [B02, B03, B04, B05, B06, B07, B08, B8A, B11, B12]   # 10 bands, 20 m resampled to 10 m (bilinear)
+  composite: median
+  window: ["2025-04-01", "2025-09-30"]
+  cloud_mask: cloud_score_plus     # GEE Cloud Score+ (cs_cdf >= 0.60); STAC fallback: SCL + s2cloudless
+  gsd_m: 10
+
+normalisation:
+  method: percentile_clip          # per band, 2nd-98th percentile
+  stats_from: train_chips_only     # NEVER val/test
+
+chips:
+  size_px: 256
+  neg_ratio: 1.0                   # negatives : positives, stratified by land cover
+  ignore_index: 255
+  border_buffer_m: 2560            # drop chips within one chip width of another split
+
+model:
+  arch: unet
+  encoder: resnet50
+  init: ssl4eo_s12_moco_all_bands  # torchgeo ResNet50_Weights.SENTINEL2_ALL_MOCO
+
+loss:
+  name: bce_dice
+  weights: [0.5, 0.5]
+
+optim:
+  name: adamw
+  lr: 3.0e-4                       # final value chosen by the equal-budget sweep below
+  weight_decay: 1.0e-4
+  schedule: cosine
+  warmup_epochs: 5
+  max_steps: 30000                 # step budget, not epochs, so data-fraction arms are comparable; set in pilot
+
+hpo_sweep:                         # identical for EVERY arm
+  lr: [1.0e-4, 3.0e-4, 1.0e-3]
+  weight_decay: [1.0e-4, 1.0e-2]
+  selection_metric: val/object_f1_large
+
+augment: [hflip, vflip, rot90, brightness_jitter_0.05]
+
+postprocess:
+  threshold: 0.5
+  morphology: none
+  min_area_ha: 0.0
+
+hardware:                          # 8 GB VRAM / 32 GB RAM workstation
+  precision: bf16-mixed            # fall back to 16-mixed if the GPU lacks bf16
+  batch_size: auto                 # Lightning batch-size finder, capped at 16
+  accumulate_to_effective_batch: 16
+  num_workers: 6
+  gradient_checkpointing: auto     # on for ViT encoders
+  checkpoint_every_n_steps: 1000   # runs must be resumable
+
+seeds: [0, 1, 2]
+checkpoint_selection: val/object_f1_large

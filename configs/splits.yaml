@@ -1,0 +1,29 @@
+# Spatial block splits. The test split is frozen once created: never regenerate
+# it after the first ablation run (docs/decisions.md must record any change).
+
+split_version: s1
+seed: 20261103
+block_size_m: 20000          # 20 km blocks on EPSG:3035
+chip_size_m: 2560            # 256 px at 10 m; also the border buffer width
+restarts: 400                # random greedy restarts; best-balanced kept
+max_rel_deviation: 0.05      # acceptance: each split within +-5% (relative) of its target
+
+# Germany bounding box (WGS84) used to lay the grid; blocks are later
+# restricted to land/Germany by the imagery pipeline (M2).
+grid_bbox_wgs84: [5.5, 47.2, 15.5, 57.4]   # extended north to cover the 2 cross-border polygons
+
+# Region proxy until BKG VG250 Laender boundaries are wired in (ROADMAP M1.4)
+region_split_lon: 10.5
+region_split_lat: 51.0
+
+fractions:
+  train: 0.70
+  val: 0.10
+  test: 0.20
+
+cv_folds: 5                  # for the final robustness check only (ROADMAP M9)
+
+outputs:
+  blocks: data/processed/splits_{split_version}_blocks.gpkg
+  polygon_assignment: data/processed/splits_{split_version}_polygons.csv
+  report: data/processed/splits_{split_version}_report.json

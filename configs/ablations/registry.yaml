@@ -1,0 +1,114 @@
+# Ablation registry: the single machine-readable list of every planned arm.
+# Each arm = id + the ONLY overrides it applies to configs/experiment/reference.yaml.
+# Status of each arm lives in runs/registry.csv (never edit statuses here).
+# Tier 1 = minimum publishable set. Tier 2 = if compute allows. Tier 3 = optional.
+# GPU-hour figures are pre-pilot estimates for an 8 GB card; re-estimate after M6.
+
+axes:
+
+  A_sensor:                                    # RQ1
+    tier: 1
+    arms:
+      - {id: A_hls30,      override: {imagery.sensor: hls_l30_s30, imagery.gsd_m: 30}}
+      - {id: A_s1,         override: {imagery.sensor: s1_grd, imagery.bands: [VV, VH, VV_std, VH_std], model.init: imagenet}}
+      - {id: A_s1s2_early, override: {imagery.sensor: s1_s2_stack}}
+      - {id: A_s1s2_mid,   override: {imagery.sensor: s1_s2_stack, model.fusion: two_encoder_mid}}
+      - {id: A_s2sr_2p5,   tier: 3, override: {imagery.sensor: s2_superres_x4, imagery.gsd_m: 2.5},
+         note: "Subset of positive chips only (storage x16). Pick one open SR model and cite it."}
+
+  B_bands:                                     # RQ2: leave-one-group-out AND add-one-group-to-RGB
+    tier: 1
+    arms:
+      - {id: B_rgb,       override: {imagery.bands: [B02, B03, B04]}}
+      - {id: B_rgb_nir,   override: {imagery.bands: [B02, B03, B04, B08]}}
+      - {id: B_rgb_re,    override: {imagery.bands: [B02, B03, B04, B05, B06, B07]}}
+      - {id: B_rgb_swir,  override: {imagery.bands: [B02, B03, B04, B11, B12]}}
+      - {id: B_all_idx,   override: {imagery.indices: [NDVI, NDBI, NDWI]}}
+      - {id: B_drop_vis,  override: {imagery.bands: [B05, B06, B07, B08, B8A, B11, B12]}}
+      - {id: B_drop_re,   override: {imagery.bands: [B02, B03, B04, B08, B11, B12]}}
+      - {id: B_drop_nir,  override: {imagery.bands: [B02, B03, B04, B05, B06, B07, B11, B12]}}
+      - {id: B_drop_swir, override: {imagery.bands: [B02, B03, B04, B05, B06, B07, B08, B8A]}}
+    note: "Encoders pretrained on 10/13 bands: zero-init missing input channels; document it."
+
+  C_temporal:                                  # RQ3
+    tier: 1
+    arms:
+      - {id: C_single,    override: {imagery.composite: least_cloudy_single_scene}}
+      - {id: C_seasonal4, override: {imagery.composite: seasonal_medians_4_stacked}}
+      - {id: C_monthly6,  tier: 2, override: {imagery.composite: monthly_medians_6, model.arch: utae}}
+
+  D_architecture:
+    tier: 2
+    arms:
+      - {id: D_deeplabv3p, override: {model.arch: deeplabv3plus}}
+      - {id: D_hrnet_w18,  override: {model.arch: hrnet, model.encoder: hrnet_w18, model.init: imagenet}}
+      - {id: D_segformer,  override: {model.arch: segformer, model.encoder: mit_b2, model.init: imagenet}}
+
+  E_init:                                      # RQ4; GFMs via TerraTorch
+    tier: 1
+    arms:
+      - {id: E_random,          override: {model.init: random}}
+      - {id: E_imagenet,        override: {model.init: imagenet}}
+      - {id: E_prithvi_frozen,  override: {model.backbone: prithvi_eo_v2_300, model.head: upernet, model.freeze_encoder: true}}
+      - {id: E_terramind_frozen, override: {model.backbone: terramind_v1_base, model.head: upernet, model.freeze_encoder: true}}
+      - {id: E_dofa_frozen,     override: {model.backbone: dofa_base, model.head: upernet, model.freeze_encoder: true}}
+      - {id: E_satlas_frozen,   override: {model.backbone: satlas_swinb_s2, model.head: upernet, model.freeze_encoder: true}}
+      - {id: E_clay_frozen,     override: {model.backbone: clay_v1_base, model.head: upernet, model.freeze_encoder: true}}
+      - {id: E_gfm1_finetune,   override: {model.freeze_encoder: false}, depends_on: best_frozen_rank_1_on_val}
+      - {id: E_gfm2_finetune,   override: {model.freeze_encoder: false}, depends_on: best_frozen_rank_2_on_val}
+    note: >
+      Fit test in M6: any backbone that cannot train at batch>=2 in 8 GB with bf16 +
+      gradient checkpointing is run frozen only, and that limitation is reported.
+      Exact model identifiers must be checked against the installed TerraTorch registry.
+
+  F_labels:                                    # RQ5
+    tier: 1
+    arms:
+      - {id: F_acc2_pos,     override: {labels.ignore_area_accuracy_2: false}}
+      - {id: F_unlinked_pos, override: {labels.ignore_unlinked: false}}
+      - {id: F_no_temporal,  override: {labels.temporal_filter: false}}
+      - {id: F_soft,         override: {labels.soft_targets: true}}
+      - {id: F_boundary1px,  override: {labels.boundary_ignore_px: 1}}
+      - {id: F_train_ge1ha,  override: {labels.train_min_ha: 1.0}}
+    note: "These need new label versions (v1-F_*); evaluation ALWAYS uses label v1."
+
+  G_data_fraction:                             # RQ5; nested subsets of TRAIN blocks
+    tier: 1
+    fractions: [0.05, 0.10, 0.25, 0.50]
+    inits: [ssl4eo_s12_moco_all_bands, best_gfm]
+    arms: generated                            # G_f{fraction}_{init} -> 8 arms
+
+  H_loss_sampling:
+    tier: 2
+    arms:
+      - {id: H_bce,        override: {loss.name: bce}}
+      - {id: H_dice,       override: {loss.name: dice}}
+      - {id: H_focal_dice, override: {loss.name: focal_dice}}
+      - {id: H_lovasz,     override: {loss.name: lovasz}}
+      - {id: H_neg3,       override: {chips.neg_ratio: 3.0}}
+      - {id: H_hardneg,    override: {chips.neg_ratio: 3.0, chips.hard_negative_share: 0.5}}
+
+  I_context:
+    tier: 2
+    arms:
+      - {id: I_chip128, override: {chips.size_px: 128}}
+      - {id: I_chip512, override: {chips.size_px: 512, hardware.batch_size: 4}}
+
+  J_postprocess:                               # no retraining: uses saved reference probabilities
+    tier: 1
+    arms:
+      - {id: J_threshold_sweep}
+      - {id: J_morph_open_close}
+      - {id: J_min_area_0p1ha}
+      - {id: J_tta_d4}
+
+factorials:                                    # interactions, reuse arms above where possible
+  F1_resolution_x_init: {factors: {sensor: [s2_10m, hls_30m, s2sr_2p5m_if_tier3], init: [ssl4eo, best_gfm]}}
+  F2_data_x_init: {factors: {fraction: [0.05, 0.25, 1.0], init: [ssl4eo, best_gfm]}}
+
+budget_estimate_gpu_hours:                     # pre-pilot, 8 GB GPU
+  per_cnn_run: [1.5, 3.0]
+  per_gfm_frozen_run: [1.5, 3.0]
+  per_gfm_finetune_run: [4.0, 8.0]
+  tier1_total: 300
+  tier2_total: 90
