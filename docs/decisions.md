@@ -12,3 +12,4 @@ Format: `YYYY-MM-DD | decision | reason | who`
 - 2026-11-03 | Journal undecided; keep all outputs venue-neutral | fharook will decide later | fharook
 - 2026-11-03 | Imagery backend proposal: Google Earth Engine server-side compositing, STAC as fallback; final choice after the M2.1 benchmark | Local disk and bandwidth limits | Claude (proposed)
 - 2026-11-05 | Use Python 3.11 with uv and PyTorch 2.9.1 CUDA 12.8 wheels on native Windows | GPU-enabled locked environment; driver 596.71 | Claude Code
+- 2026-11-06 | Do not change the reference negative-sampling ratio or generate a chip manifest yet: `reference.yaml` specifies 1:1, while the roadmap specifies a 1:3 parent pool with a nested 1:1 subset | The subset/manifest semantics are not defined well enough to infer intent; researcher clarification is required before freezing data | Codex (audit)

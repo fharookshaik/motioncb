@@ -1,16 +1,16 @@
-# solar-ablation-de
+# MotionCB — Solar PV detection research core
 
-Ablation study: detection and segmentation of ground-mounted PV farms in Germany from open satellite imagery (Sentinel-2, Sentinel-1, HLS). Implementation and maintenance run by Claude Code (see `CLAUDE.md`).
+A research platform for ground-mounted PV farm detection and segmentation in Germany from open satellite imagery (Sentinel-2 reference, Sentinel-1 and HLS experiments). The checkout currently contains label curation, spatial split assignment, ignore-aware pixel metrics, and probability-raster polygon export. Model training, real inference, API, and map UI remain in progress; no real dataset or checkpoint is bundled.
 
-## Quick start (Windows)
+## Quick start
 
-1. Put `V20260203.zip` contents under `data/raw/V20260203/gpkg/` and `data/raw/V20260203/csv/`.
-2. Install uv, then create environment: `make setup`. Run project commands through `uv run`.
-3. Install PyTorch CUDA matching driver shown by `nvidia-smi`; use install command from https://pytorch.org/get-started/locally/.
-4. Check: `make labels`, `make splits`, `make test`.
-5. Start Claude Code in project folder: `claude`. First message: *"Read CLAUDE.md and docs/ROADMAP.md, run /next-step."*
+1. Install Python 3.11 and `uv`.
+2. Install core/dev/GIS dependencies: `uv sync --extra dev --extra geo`.
+3. Run checks: `uv run pytest -q` and `uv run ruff check src tests`.
+4. To curate labels, put the UFZ/MaStR V20260203 files under the paths in `configs/data.yaml`, then run `uv run python -m solarde.labels.curate --config configs/data.yaml`.
+5. Review `docs/decisions.md` and `configs/splits.yaml` before creating split s1 with `uv run python -m solarde.splits.blocks --config configs/splits.yaml --data-config configs/data.yaml`.
 
-Native Windows PowerShell only. WSL and Bash are not required.
+Use direct `uv run` commands from PowerShell, macOS, or Linux shells. The current Makefile uses PowerShell syntax.
 
 ## Layout
 
@@ -27,7 +27,16 @@ configs/ablations/registry.yaml every planned ablation arm
 src/solarde/ package: labels, splits (done); imagery, data, models, train, evaluate, analysis (to build)
 .claude/skills/ /next-step, /run-ablation, /status-report
 .claude/agents/ leakage-auditor, results-reviewer (independent reviewers)
+docs/IMPLEMENTATION_AUDIT.md implementation audit
+docs/ARCHITECTURE.md current and target architecture
+docs/SETUP.md environment and local commands
+docs/API.md API status and planned contract
+docs/VALIDATION_REPORT.md current checks and acceptance status
 ```
+
+Prediction polygon export accepts an existing single-band probability GeoTIFF; it does not run
+inference. See `docs/SETUP.md` for the command and `docs/VALIDATION_REPORT.md` for tested limits.
+Pull requests run locked Python tests and Ruff on Ubuntu and Windows through `.github/workflows/ci.yml`.
 
 ## Data licence and attribution
 

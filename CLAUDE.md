@@ -51,7 +51,9 @@ make test       # pytest via uv run
 make check      # tests + ruff + disk report before every commit
 make disk       # data/runs usage and available disk space
 
-Use native Windows PowerShell only. Do not require WSL or Bash. Run Python via uv run.
+Run Python via `uv run`. Support local macOS/Linux development with direct `uv run` commands where
+practical; use native PowerShell on Windows. Do not require WSL. The current Makefile uses
+PowerShell syntax and is therefore Windows-only; document direct commands for other hosts.
 ```
 Add new targets to the Makefile as stages are implemented (imagery, chips, train, eval, analysis),
 and document them here.

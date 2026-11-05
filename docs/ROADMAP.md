@@ -59,6 +59,11 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
 - [ ] M4.3 Equal-budget HPO sweep runner (`hpo_sweep`), with selection on val only.
 
 ## M5: Evaluation
+- [x] M5.0 Probability-raster post-processing: threshold a georeferenced single-band raster,
+  exclude nodata, polygonize connected regions, calculate area in EPSG:3035, and export WGS84
+  GeoJSON. Synthetic checks pass; no real model raster is available (2026-11-06).
+- [x] M5.2a Accumulated pixel confusion counts, precision/recall/F1/IoU, with ignore value 255
+  excluded and undefined metrics returned as null. Hand-computed synthetic test passes (2026-11-06).
 - [ ] M5.1 Sliding-window inference over whole blocks (overlap 25%, cosine blending).
 - [ ] M5.2 Metrics: accumulated PV IoU, pixel P/R/F1, object detection (≥10% cover) and
   delineation (IoU ≥0.5), recall per size bin and per mounting type, boundary F1 (1 px), area
