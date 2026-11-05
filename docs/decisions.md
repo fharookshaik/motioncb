@@ -11,3 +11,4 @@ Format: `YYYY-MM-DD | decision | reason | who`
 - 2026-11-03 | Split s1: 20 km EPSG:3035 blocks, 70/10/20, greedy balance stratified by a 4-region proxy (lon 10.5°, lat 51.0°), seed 20261103; worst deviation 2.2% | Spatial leakage control | Claude (per study design)
 - 2026-11-03 | Journal undecided; keep all outputs venue-neutral | fharook will decide later | fharook
 - 2026-11-03 | Imagery backend proposal: Google Earth Engine server-side compositing, STAC as fallback; final choice after the M2.1 benchmark | Local disk and bandwidth limits | Claude (proposed)
+- 2026-11-05 | Use Python 3.11 with uv and PyTorch 2.9.1 CUDA 12.8 wheels on native Windows | GPU-enabled locked environment; driver 596.71 | Claude Code

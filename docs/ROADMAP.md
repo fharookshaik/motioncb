@@ -4,7 +4,7 @@ Claude Code works top to bottom. An item is done only when its **acceptance** cr
 checked. `[H]` marks a task that needs Fharook. Prepare everything around it, then ask him.
 
 ## M0: Environment
-- [ ] M0.1 Create the Python 3.11 uv environment from `pyproject.toml` and `uv.lock`. Install torch with the CUDA build matching
+- [x] M0.1 Create the Python 3.11 uv environment from `pyproject.toml` and `uv.lock`. Install torch with the CUDA build matching
   the driver (`nvidia-smi`). Use Windows PowerShell for all project commands; do not require WSL or Bash.
   *Acceptance:* `uv run python -c "import torch; print(torch.cuda.is_available())"` prints True. `make test` passes.
 - [ ] M0.2 GPU probe script `scripts/gpu_probe.py`: VRAM, bf16 support, max batch for U-Net-R50 at
