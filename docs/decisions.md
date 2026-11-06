@@ -31,3 +31,4 @@ Format: `YYYY-MM-DD | decision | reason | who`
 - 2026-11-06 | Split s1 frozen-file hashes recorded (leakage audit): blocks `db9d3b50…b03b40`, polygons `cb41f896…8bfda7`, report `063c3ccb…0a1b43`. M1.6 only reads the split as a filter and does not regenerate it | Leakage audit item 1 | Claude Code
 - 2026-11-06 | OPEN for M3.1: exclude training chips within 2,560 m (`chip_size_m`) of any val or test block. Not applicable to M1.6, which has no chips yet | Leakage audit item 2 | Claude Code
 - 2026-11-06 | T-new and T-indep reports carry git hash, dirty flag, config sha256 and input hashes. Builds before the commit were made from uncommitted code; the reports are regenerated from the committed tree | Leakage audit item 5 | Claude Code
+- 2026-11-06 | Deleted the stale area_id-keyed `data/processed/tnew_s1_vs_V20240104.csv` (504 rows, 19:07) on Fharook's instruction. Superseded by `tnew_s1_vs_V20240104_geomatch.csv` | Fharook approved deletion | fharook
