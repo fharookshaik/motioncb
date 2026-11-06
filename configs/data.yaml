@@ -7,8 +7,10 @@ raw:
   release: V20260203
   polygons: data/raw/V20260203/gpkg/Solar_Energy_Polygons_V20260203.gpkg
   records: data/raw/V20260203/csv/Solar_Energy_V20260203.csv
-  # Optional, for test set T-new (download from https://zenodo.org/records/16942382)
-  previous_polygons: data/raw/V20250101/gpkg/Solar_Energy_Polygons_V20250101.gpkg
+  # T-new reference release. V20250101 (Zenodo 16942382) is restricted; V20240104 (Zenodo 14627853) is the
+  # substitute, a year older (cut-off 2024-01-04): T-new = test polygons added after that cut-off. See docs/decisions.md.
+  previous_release: V20240104
+  previous_polygons: data/raw/V20240104/geojson/Solar_Energy_Polygons_V20240104.geojson
 
 crs:
   equal_area: 3035        # all area / distance statistics and the split grid

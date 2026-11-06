@@ -35,3 +35,8 @@ Format:
 ## 2026-11-06 | M1.5 cleanup | label v1
 - Obsolete manual-review tooling and generated files removed at Fharook's request; source-backed closure retained.
 - Correction to the blanket unreviewed status above: three partial `panel_rows` entries existed in the CSV; IDs preserved in `docs/decisions.md` before removal. No completed audit or release-wide validation claimed.
+
+## 2026-11-06 | M1.6 test-set construction | label v1 | split s1
+- T-new: 504 of 2,230 test polygons (212 positive, 292 ignore) with no V20240104 match at IoU ≥ 0.5. Sensitivity at IoU 0.1 / 0.25 / 0.5 / 0.75: 493 / 499 / 504 / 546.
+- KIT RADAR manual tiles: 84, md5 84/84. 15 touch only test blocks; 7 of those hold GMPV (7.04 ha).
+- note: construction counts only. No model evaluated, no test-access event, split s1 unchanged (sha256 cb41f896…8bfda7).
