@@ -28,7 +28,8 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
   mapping convention from independently verified release-wide adherence.
   Done 2026-11-06: Manske et al. (2022), §3.2 defines outer edges of coherent PV modules,
   not fences; V20260203 cites this methodology. Manual review waived at Fharook's request.
-  Prepared sample retained, unreviewed; no category counts or independent validation claimed.
+  Obsolete sampler, tests, guide and generated files removed after closure; three partial CSV
+  entries preserved in decisions.md. No release-wide independent validation claimed.
 - [ ] M1.6 Download V20250101 (Zenodo 16942382) and build test set T-new (new polygons inside
   test blocks). Download the KIT RADAR manual labels for T-indep.
 

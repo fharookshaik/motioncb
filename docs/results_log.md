@@ -31,3 +31,7 @@ Format:
 - Supersedes the pending manual-review status above: visual review waived; source-backed semantics paragraph recorded in `docs/decisions.md`.
 - Sample remains unreviewed; no observed category counts, error rates or independent validation results.
 - Intended convention: panel-array footprint per Manske et al. (2022), §3.2, cited by V20260203; current-release adherence not independently audited.
+
+## 2026-11-06 | M1.5 cleanup | label v1
+- Obsolete manual-review tooling and generated files removed at Fharook's request; source-backed closure retained.
+- Correction to the blanket unreviewed status above: three partial `panel_rows` entries existed in the CSV; IDs preserved in `docs/decisions.md` before removal. No completed audit or release-wide validation claimed.
