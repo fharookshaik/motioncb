@@ -35,3 +35,10 @@ Format:
 ## 2026-11-06 | M1.5 cleanup | label v1
 - Obsolete manual-review tooling and generated files removed at Fharook's request; source-backed closure retained.
 - Correction to the blanket unreviewed status above: three partial `panel_rows` entries existed in the CSV; IDs preserved in `docs/decisions.md` before removal. No completed audit or release-wide validation claimed.
+
+## 2026-11-06 | M1.6 test-set build | label v1 | split s1
+- T-new (V20260203 vs V20240104 substitute, geometric match IoU 0.5 and 50 m): 2,131 new polygons; 876 label-v1 positives; 178 in test blocks; 173 kept.
+- T-new sensitivity: IoU 0.3, 0.5, 0.7 at 50 m all give 173; at IoU 0.5, 25, 50, 100 m give 178, 173, 169.
+- T-new commissioning: 140 of 173 by `commission_last` in 2024.
+- T-indep (KIT RADAR manual labels, CC BY-SA 4.0): 15 of 84 tiles usable (11 NRW, 4 Hesse); 1,759,716 ground-PV pixels (about 7.0 ha); six label-v1 positives touch usable tiles, none commissioned after the tile year.
+- note: data-only result. No model, no test-split metric, no `make eval-test`, so `runs/test_access.log` is not written.

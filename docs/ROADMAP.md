@@ -30,8 +30,11 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
   not fences; V20260203 cites this methodology. Manual review waived at Fharook's request.
   Obsolete sampler, tests, guide and generated files removed after closure; three partial CSV
   entries preserved in decisions.md. No release-wide independent validation claimed.
-- [ ] M1.6 Download V20250101 (Zenodo 16942382) and build test set T-new (new polygons inside
+- [x] M1.6 Download V20250101 (Zenodo 16942382) and build test set T-new (new polygons inside
   test blocks). Download the KIT RADAR manual labels for T-indep.
+  Done 2026-11-06: V20250101 is restricted and no access was granted, so T-new uses the approved
+  substitute V20240104 (Zenodo 14627853) with geometric matching. 173 T-new polygons. T-indep: 15 of 84
+  KIT tiles usable. See decisions.md and results_log.md.
 
 ## M2: Imagery pipeline
 - [ ] M2.1 Backend benchmark: (a) Google Earth Engine `computePixels` with server-side

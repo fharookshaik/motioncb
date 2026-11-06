@@ -1,7 +1,7 @@
 SHELL := powershell.exe
 .SHELLFLAGS := -NoLogo -NoProfile -NonInteractive -Command
 
-.PHONY: setup labels splits audit-sample test lint check disk
+.PHONY: setup labels splits audit-sample testsets test lint check disk
 
 setup:
 	uv sync --extra dev --extra geo --extra train --extra imagery
@@ -14,6 +14,10 @@ splits:
 
 audit-sample:
 	uv run python scripts/make_audit_sample.py --config configs/splits.yaml
+
+testsets:
+	uv run python -m solarde.splits.tnew --config configs/testsets.yaml
+	uv run python -m solarde.labels.kit_indep --config configs/testsets.yaml
 
 test:
 	uv run pytest -q

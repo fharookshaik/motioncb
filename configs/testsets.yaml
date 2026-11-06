@@ -1,0 +1,23 @@
+# Test-set definitions (ROADMAP M1.6). Paths are repo-relative.
+
+tnew:
+  current: data/raw/V20260203/gpkg/Solar_Energy_Polygons_V20260203.gpkg
+  # Substitute for V20250101 (Zenodo 16942382, restricted, no file access). Approved by Fharook 2026-11-06.
+  comparator: data/raw/zenodo_V20240104/geojson/Solar_Energy_Polygons_V20240104.geojson
+  labels: data/interim/labels_v1.gpkg
+  # A current polygon with no comparator polygon at IoU >= match_iou counts as new.
+  # area_id is not stable across releases, so matching is geometric.
+  match_iou: 0.5
+  # An unmatched polygon whose nearest comparator polygon is closer than this is a revised farm, not an addition.
+  revised_within_m: 50
+  polygon_split: data/processed/splits_s1_polygons.csv
+  # New name: data/processed/tnew_s1_vs_V20240104.csv is a stale area_id-keyed output and is kept untouched.
+  out_csv: data/processed/tnew_s1_vs_V20240104_geomatch.csv
+  out_report: data/processed/tnew_s1_vs_V20240104_geomatch_report.json
+
+tindep:
+  tiles_dir: data/raw/kit_radar_pv_labels/dataset
+  blocks: data/processed/splits_s1_blocks.gpkg
+  labels: data/interim/labels_v1.gpkg
+  out_manifest: data/processed/tindep_kit_manifest.csv
+  out_report: data/processed/tindep_kit_report.json
