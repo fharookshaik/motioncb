@@ -19,9 +19,10 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
   composite + a freely viewable high-res basemap, used for inspection only) and a CSV form
   (window_id, missing_pv_count, notes). Fharook fills it in.
   *Acceptance:* omission rate with a 95% CI written to docs/results_log.md.
-- [ ] M1.4 Replace the region proxy (lon 10.5 / lat 51.0) with BKG VG250 Länder groups if it
+- [x] M1.4 Replace the region proxy (lon 10.5 / lat 51.0) with BKG VG250 Länder groups if it
   changes assignments materially. Otherwise keep it and document why. Must be done **before
   M6**, because the split freezes then.
+  Done 2026-11-06: 4 Land groups (North, West, South, East), split s1 regenerated; see decisions.md.
 - [ ] M1.5 [H] Polygon-semantics check: 100 random polygons on the basemap. Does the outline follow
   the panel rows or the fence? *Acceptance:* one paragraph in decisions.md.
 - [ ] M1.6 Download V20250101 (Zenodo 16942382) and build test set T-new (new polygons inside

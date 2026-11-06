@@ -39,10 +39,25 @@ def make_grid(bbox_wgs84: list[float], size_m: float, crs: int = 3035) -> gpd.Ge
     return gpd.GeoDataFrame(rows, crs=crs)
 
 
-def region_of(lon: np.ndarray, lat: np.ndarray, lon_split: float, lat_split: float) -> np.ndarray:
-    ns = np.where(lat >= lat_split, "N", "S")
-    ew = np.where(lon >= lon_split, "E", "W")
-    return np.char.add(ns.astype(str), ew.astype(str))
+def land_group_of(blocks: gpd.GeoDataFrame, source: dict) -> pd.Series:
+    """Region group per block from the BKG VG250 Laender layer (AGS code).
+
+    Centroids outside every Land (border, sea, generalisation gaps) take the nearest Land.
+    """
+    lan = gpd.read_file(resolve(source["path"]), layer=source["layer"])[["AGS", "geometry"]].to_crs(blocks.crs)
+    cent = gpd.GeoDataFrame(index=blocks.index, geometry=blocks.geometry.centroid, crs=blocks.crs)
+    inside = gpd.sjoin(cent, lan, how="left", predicate="within")
+    inside = inside[~inside.index.duplicated(keep="first")]
+    missing = inside.index[inside["AGS"].isna()]
+    if len(missing):
+        near = gpd.sjoin_nearest(cent.loc[missing], lan, how="left")
+        near = near[~near.index.duplicated(keep="first")]
+        inside.loc[missing, "AGS"] = near["AGS"]
+    ags_to_group = {code: grp for grp, codes in source["groups"].items() for code in codes}
+    region = inside["AGS"].map(ags_to_group)
+    if region.isna().any():
+        raise ValueError(f"{int(region.isna().sum())} blocks have no region group; check region_source.groups")
+    return region
 
 
 def _greedy(weights: np.ndarray, order: np.ndarray, targets: np.ndarray) -> np.ndarray:
@@ -120,8 +135,7 @@ def build(labels_gdf: gpd.GeoDataFrame, cfg: dict) -> tuple[gpd.GeoDataFrame, pd
     )
     # keep blocks with any polygon (positive or ignore) plus all blocks overlapping the polygon extent;
     # land/Germany masking of empty blocks happens in the imagery pipeline.
-    bc = blocks.geometry.centroid.to_crs(4326)
-    blocks["region"] = region_of(bc.x.to_numpy(), bc.y.to_numpy(), cfg["region_split_lon"], cfg["region_split_lat"])
+    blocks["region"] = land_group_of(blocks, cfg["region_source"])
     blocks["n_polygons_any"] = blocks.block_id.map(j.groupby("block_id").size()).fillna(0).astype(int)
 
     names, fracs = list(cfg["fractions"].keys()), list(cfg["fractions"].values())

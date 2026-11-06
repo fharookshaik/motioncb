@@ -12,9 +12,16 @@ max_rel_deviation: 0.05      # acceptance: each split within +-5% (relative) of 
 # restricted to land/Germany by the imagery pipeline (M2).
 grid_bbox_wgs84: [5.5, 47.2, 15.5, 57.4]   # extended north to cover the 2 cross-border polygons
 
-# Region proxy until BKG VG250 Laender boundaries are wired in (ROADMAP M1.4)
-region_split_lon: 10.5
-region_split_lat: 51.0
+# Region groups for stratified balancing: BKG VG250 Laender (AGS codes), ROADMAP M1.4.
+# Hamburg, Bremen and Saarland are small; they stay grouped to keep each group balanceable.
+region_source:
+  path: data/raw/bkg_vg250/vg250_ebenen_0101/DE_VG250.gpkg
+  layer: vg250_lan
+  groups:
+    North: ["01", "02", "03", "04", "13"]   # SH, HH, NI, HB, MV
+    West:  ["05", "06", "07", "10"]         # NW, HE, RP, SL
+    South: ["08", "09"]                     # BW, BY
+    East:  ["11", "12", "14", "15", "16"]   # BE, BB, SN, ST, TH
 
 fractions:
   train: 0.70
