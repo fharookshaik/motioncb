@@ -100,7 +100,8 @@ reference. Holm correction per axis. Pre-declared minimum effects (set after the
 Unmapped farms (completeness audit plus a false-positive audit); label/imagery date mismatch
 (temporal filter, F_no_temporal, T-new); spatial autocorrelation (blocks, buffer, T-region); regional
 imbalance (stratified splits); S2 misregistration (boundary tolerance, F_boundary1px); polygon
-semantics (visual check); unequal tuning (equal sweep); GPU limits that force frozen GFMs (reported
+semantics (author-documented panel-array footprint, Manske et al. 2022 §3.2; release-wide adherence
+not independently audited); unequal tuning (equal sweep); GPU limits that force frozen GFMs (reported
 explicitly as a limitation).
 
 ## 10. Sources

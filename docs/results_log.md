@@ -26,3 +26,8 @@ Format:
 - Exported 100 sampled outlines and a blank review form to `runs/audit_m1_5/`; seed 20261106.
 - Verified polygon/form/manifest ID alignment and source-label SHA-256; no QGIS project generated.
 - No scientific result yet: Fharook's visual review and decision-log acceptance paragraph are pending.
+
+## 2026-11-06 | M1.5 source-documentation closure | label v1
+- Supersedes the pending manual-review status above: visual review waived; source-backed semantics paragraph recorded in `docs/decisions.md`.
+- Sample remains unreviewed; no observed category counts, error rates or independent validation results.
+- Intended convention: panel-array footprint per Manske et al. (2022), §3.2, cited by V20260203; current-release adherence not independently audited.

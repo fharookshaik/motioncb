@@ -23,11 +23,12 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
   changes assignments materially. Otherwise keep it and document why. Must be done **before
   M6**, because the split freezes then.
   Done 2026-11-06: 4 Land groups (North, West, South, East), split s1 regenerated; see decisions.md.
-- [ ] M1.5 [H] Polygon-semantics check: 100 random polygons on the basemap. Does the outline follow
-  the panel rows or the fence? *Acceptance:* one paragraph in decisions.md.
-  Prepared 2026-11-06: `make audit-semantics` exports `runs/audit_m1_5/` (100 polygons,
-  blank review CSV, manifest, instructions; no `.qgs` requested). Review guide:
-  `docs/semantics_audit.md`. Awaiting Fharook's visual review; acceptance not yet met.
+- [x] M1.5 Polygon semantics documented from author methodology instead of a 100-polygon visual review.
+  *Revised acceptance:* source-backed paragraph in decisions.md, explicitly distinguishing intended
+  mapping convention from independently verified release-wide adherence.
+  Done 2026-11-06: Manske et al. (2022), §3.2 defines outer edges of coherent PV modules,
+  not fences; V20260203 cites this methodology. Manual review waived at Fharook's request.
+  Prepared sample retained, unreviewed; no category counts or independent validation claimed.
 - [ ] M1.6 Download V20250101 (Zenodo 16942382) and build test set T-new (new polygons inside
   test blocks). Download the KIT RADAR manual labels for T-indep.
 

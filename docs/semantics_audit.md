@@ -1,5 +1,12 @@
 # M1.5 polygon-semantics review
 
+**Status 2026-11-06: optional, not required.** Manual review waived in favor of author-documented
+mapping semantics; see `docs/decisions.md`. Manske et al. (2022), §3.2
+(<https://doi.org/10.3390/data7090128>) defines outer edges of coherent PV modules, not fences.
+V20260203 cites that methodology, but release-wide adherence has not been independently audited.
+Existing sample and blank CSV remain unreviewed. Instructions below are retained only for an
+optional future check; their completion requirements no longer gate M1.5.
+
 Goal: determine whether label outlines follow **panel rows** or the **site/fence boundary**.
 Review 100 randomly sampled label-v1 polygons. No QGIS project file is required.
 
