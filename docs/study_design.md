@@ -80,8 +80,8 @@ Budget (pre-pilot estimate, 8 GB GPU): Tier 1 ≈ 37 arms × 3 seeds ≈ 300 GPU
 
 ## 7. Splits and evaluation
 
-- Split s1: 20 km EPSG:3035 blocks, 70/10/20, balanced on PV area and size mix within 4 regions
-  (worst deviation 2.2%). A 2.56 km border buffer. 130 cross-border polygons are masked outside
+- Split s1: 20 km EPSG:3035 blocks, 70/10/20, balanced on PV area and size mix within 4 VG250 Land groups
+  (North, West, South, East; worst deviation 1.8%). A 2.56 km border buffer. 132 polygons that cross a split border are masked outside
   their own block. 5-fold block CV is used for the final check only.
 - Test sets: T-main (held-out blocks), T-region (leave-one-region-out), T-new (V20260203 minus
   V20250101), T-indep (KIT RADAR manual labels, Hesse/NRW), T-wall (false positives per 1,000 km²).

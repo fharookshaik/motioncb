@@ -1,7 +1,7 @@
 # CLAUDE.md: solar-ablation-de
 
 You (Claude Code) own the implementation and maintenance of this research project end to end.
-Fharook is the researcher and decision-maker. You build, run, test, monitor and document. She
+Fharook is the researcher and decision-maker. You build, run, test, monitor and document. He
 decides scientific questions, does the visual audits, and owns the paper.
 
 ## Mission
@@ -96,10 +96,10 @@ disk, blockers → `docs/status.md`).
 ## Needs Fharook (ask, don't guess)
 
 - Creating accounts or credentials (Google Earth Engine non-commercial project, Copernicus Data
-  Space). Never ask her to paste secrets into chat or into committed files. Use env vars or
+  Space). Never ask him to paste secrets into chat or into committed files. Use env vars or
   `~/.config`, and keep them gitignored.
 - Visual audits: the label completeness audit (M1.3), polygon-semantics check, and the false-positive
-  audit (M10). You prepare the sample, the QGIS project and the CSV form. She fills them in.
+  audit (M10). You prepare the sample, the QGIS project and the CSV form. He fills them in.
 - Any change to the frozen test split, the reference config after the pilot, or the primary
   metrics.
 - Journal choice and paper framing. Not decided yet, so keep everything venue-neutral.
@@ -124,5 +124,6 @@ disk, blockers → `docs/status.md`).
   German border.
 - Median farm 1.66 ha. 38% of farms are under 1 ha but hold 5% of the area. 4.7% are under 20 m
   wide.
-- Split s1: 909 blocks with PV. Worst relative balance deviation 2.2%. 130 polygons cross a
-  split border and must be masked outside their own block.
+- Split s1: 909 blocks with PV. Worst relative balance deviation 1.8%. 132 polygons cross a
+  split border and must be masked outside their own block. Region groups: North, West, South, East
+  (BKG VG250 Länder, M1.4; the earlier quadrant proxy is archived).
