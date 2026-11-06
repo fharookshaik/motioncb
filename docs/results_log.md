@@ -21,3 +21,8 @@ Format:
 - labelled positives fully inside windows: 138; missed farms inside windows: 2 (W18, W34)
 - omission rate: 1.43% (2 / 140); block-bootstrap 95% CI [0.00%, 3.62%] (10,000 resamples over 60 blocks)
 - note: windows are anchored on labelled farms, so this is omission near labelled farms, not landscape-wide omission. W40 lists 2 farms outside its window; excluded from the count.
+
+## 2026-11-06 | M1.5 preparation only | label v1
+- Exported 100 sampled outlines and a blank review form to `runs/audit_m1_5/`; seed 20261106.
+- Verified polygon/form/manifest ID alignment and source-label SHA-256; no QGIS project generated.
+- No scientific result yet: Fharook's visual review and decision-log acceptance paragraph are pending.
