@@ -13,3 +13,4 @@ Format: `YYYY-MM-DD | decision | reason | who`
 - 2026-11-03 | Imagery backend proposal: Google Earth Engine server-side compositing, STAC as fallback; final choice after the M2.1 benchmark | Local disk and bandwidth limits | Claude (proposed)
 - 2026-11-05 | Use Python 3.11 with uv and PyTorch 2.9.1 CUDA 12.8 wheels on native Windows | GPU-enabled locked environment; driver 596.71 | Claude Code
 - 2026-11-05 | GPU probe: RTX 2000 Ada Generation Laptop GPU, 8,585,216,000 bytes VRAM, bf16 supported; U-Net ResNet-50 10-band 256 px batch 16 fits (cap 16), peak allocated 1,809,407,488 bytes | One synthetic AdamW step with BCE/Dice, randomly initialized encoder and bf16; not a full training benchmark | Claude Code
+- 2026-11-06 | M1.3 audit sample: 60 random 5×5 km windows, 15 per region, drawn from val+test blocks only, seed 20261106; written to runs/audit_m1_3/ (not committed) | Inspection sample for completeness audit; region proxy used until M1.4 | Claude Code

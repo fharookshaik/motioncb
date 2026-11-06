@@ -1,7 +1,7 @@
 SHELL := powershell.exe
 .SHELLFLAGS := -NoLogo -NoProfile -NonInteractive -Command
 
-.PHONY: setup labels splits test lint check disk
+.PHONY: setup labels splits audit-sample test lint check disk
 
 setup:
 	uv sync --extra dev --extra geo --extra train --extra imagery
@@ -11,6 +11,9 @@ labels:
 
 splits:
 	if ((Test-Path 'runs') -and (Get-ChildItem 'runs' -Directory | Select-Object -First 1) -and (Test-Path 'data/processed/splits_s1_blocks.gpkg')) { Write-Error 'Refusing: training runs exist and split s1 is frozen (CLAUDE.md invariant 1).'; exit 1 }; uv run python -m solarde.splits.blocks --config configs/splits.yaml --data-config configs/data.yaml
+
+audit-sample:
+	uv run python scripts/make_audit_sample.py --config configs/splits.yaml
 
 test:
 	uv run pytest -q
