@@ -1,14 +1,15 @@
 # MotionCB — Solar PV detection research core
 
-A research platform for ground-mounted PV farm detection and segmentation in Germany from open satellite imagery (Sentinel-2 reference, Sentinel-1 and HLS experiments). The checkout currently contains label curation, spatial split assignment, ignore-aware pixel metrics, and probability-raster polygon export. Model training, real inference, API, and map UI remain in progress; no real dataset or checkpoint is bundled.
+A research platform for ground-mounted PV farm detection and segmentation in Germany from open satellite imagery (Sentinel-2 reference, Sentinel-1 and HLS experiments). The checkout contains validated label curation, spatial split verification, bounded pilot mask preparation, single-scene Sentinel-2 alignment QA, ignore-aware pixel metrics, and probability-raster polygon export. Reference compositing, model training, inference, API, and map UI remain in progress. Raw data and checkpoints are not bundled in Git.
 
 ## Quick start
 
 1. Install Python 3.11 and `uv`.
 2. Install core/dev/GIS dependencies: `uv sync --extra dev --extra geo`.
 3. Run checks: `uv run pytest -q` and `uv run ruff check src tests`.
-4. To curate labels, put the UFZ/MaStR V20260203 files under the paths in `configs/data.yaml`, then run `uv run python -m solarde.labels.curate --config configs/data.yaml`.
-5. Review `docs/decisions.md` and `configs/splits.yaml` before creating split s1 with `uv run python -m solarde.splits.blocks --config configs/splits.yaml --data-config configs/data.yaml`.
+4. Import the original local ZIP with `uv run python -m solarde.data.raw --config configs/data.yaml --archive /path/to/V20260203.zip`, then curate with `uv run python -m solarde.labels.curate --config configs/data.yaml`.
+5. Review `docs/decisions.md` before initial split creation. Verify existing outputs with `uv run python -m solarde.splits.verify --config configs/splits.yaml --rebuild-check`.
+6. Prepare pilot masks with `uv run python -m solarde.data.chips --config configs/preparation.yaml`; acquire exploratory QA with `uv run python -m solarde.imagery.preview --config configs/preparation.yaml`.
 
 Use direct `uv run` commands from PowerShell, macOS, or Linux shells. The current Makefile uses PowerShell syntax.
 

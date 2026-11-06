@@ -11,7 +11,13 @@ default; benchmark callers must use the resolved frozen configuration explicitly
 255, and computes pixel precision, recall, F1, and IoU from global counts rather than per-window
 averages.
 
-There is no API server, browser client, training code, imagery ingestion, inference runner, durable
+`solarde.data.raw` imports/validates actual source files; `solarde.splits.verify` checks existing
+geographic artifacts without replacing them. `solarde.data.chips` and `rasterize` prepare bounded
+train-only grids and masks with enforced split buffers and checksum-bound draft manifests.
+`solarde.imagery.stac` streams COG windows, and `imagery.preview` produces one exploratory real-scene
+alignment QA artifact. These do not yet implement the full seasonal training dataset.
+
+There is no API server, browser client, training code, inference runner, durable
 job worker, or MLflow integration yet. The vectorizer is post-processing, not inference.
 The Python test/lint CI workflow is configured for Ubuntu and Windows; no frontend or API contract
 checks exist yet.
@@ -45,7 +51,9 @@ restarts. FastAPI in-process background tasks are unsuitable for long GPU jobs.
 6. Produce georeferenced probability rasters, vectorize them for browsing/export, and publish
    metrics with block-level uncertainty.
 
-Stages 3–6 are still unimplemented except for the isolated raster-to-vector post-processing step.
+Stage 3 has draft pilot grid/mask preparation and single-scene QA; its full reference composite,
+stratified sampling, normalization, and train-ready dataset remain unfinished. Stages 4–6 are still
+unimplemented except for pixel metrics and the raster-to-vector post-processing step.
 The negative-sampling conflict and provisional region proxy need review before split/chip artifacts
 are frozen.
 

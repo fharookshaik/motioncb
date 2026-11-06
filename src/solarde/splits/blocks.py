@@ -174,20 +174,26 @@ def main(argv: list[str] | None = None) -> None:
     cfg = load_yaml(args.config)
     dcfg = load_yaml(args.data_config)
 
+    # Put protection in the CLI itself, not only in a platform-specific Makefile.
+    # Verify existing artifacts without regenerating even before training starts.
+    sv = cfg["split_version"]
+    output_paths = [resolve(value.format(split_version=sv)) for value in cfg["outputs"].values()]
+    if any(path.exists() for path in output_paths):
+        raise SystemExit("Split artifacts already exist; preserved. Run solarde.splits.verify instead.")
+
     labels_path = resolve(dcfg["outputs"]["labels"].format(label_version=dcfg["label_version"]))
     labels_gdf = gpd.read_file(labels_path, layer="labels")
     blocks, poly, report = build(labels_gdf, cfg)
     report["label_version"] = dcfg["label_version"]
+    if not report["accepted"]:
+        raise SystemExit("Split balance outside tolerance; no artifacts written. Review the configured protocol.")
 
-    sv = cfg["split_version"]
     out_b = resolve(cfg["outputs"]["blocks"].format(split_version=sv))
     out_b.parent.mkdir(parents=True, exist_ok=True)
     blocks.to_file(out_b, driver="GPKG", layer="blocks")
     poly.to_csv(resolve(cfg["outputs"]["polygon_assignment"].format(split_version=sv)), index=False)
     resolve(cfg["outputs"]["report"].format(split_version=sv)).write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))
-    if not report["accepted"]:
-        raise SystemExit("Split balance outside tolerance: raise `restarts` or review block size.")
 
 
 if __name__ == "__main__":

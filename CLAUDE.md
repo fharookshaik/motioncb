@@ -47,6 +47,10 @@ write the chips.
 make setup      # uv sync; dependencies in pyproject.toml and uv.lock
 make labels     # data/raw -> data/interim/labels_v1.gpkg (+ report)
 make splits     # 20 km block splits -> data/processed/splits_s1_*
+make validate-data ARCHIVE=path/to/V20260203.zip # CRC/import/source invariants; ZIP preserved
+make verify-splits # compare existing artifacts and an in-memory rebuild
+make prepare-pilot # draft train-only footprints/masks, not a frozen dataset
+make preview-pilot # one actual Sentinel-2 scene for exploratory alignment QA
 make test       # pytest via uv run
 make check      # tests + ruff + disk report before every commit
 make disk       # data/runs usage and available disk space

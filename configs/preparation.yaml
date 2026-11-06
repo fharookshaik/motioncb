@@ -1,0 +1,11 @@
+# Bounded preparation run, not a frozen reference training manifest.
+data_config: configs/data.yaml
+split_config: configs/splits.yaml
+reference_config: configs/experiment/reference.yaml
+seed: 20261103
+pilot_split: train
+target_farm_ha: 10
+grid_radius_chips: 2
+max_positive_chips: 4
+candidate_negative_ratio: 3
+output_dir: data/processed/pilot_preparation

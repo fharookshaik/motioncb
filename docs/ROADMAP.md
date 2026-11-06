@@ -14,6 +14,9 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
 ## M1: Labels and splits
 - [x] M1.1 Label curation (`make labels`) → label v1. Done 2026-11-03: 9,219 positive / 1,765 ignore.
 - [x] M1.2 Block splits (`make splits`) → split s1. Done 2026-11-03: worst deviation 2.2%.
+  Local revalidation 2026-11-06: 10,984 / 9,219 / 1,765 labels confirmed from the original archive;
+  current split reproduction gives 2.01% deviation / 128 crossing polygons. Historical split
+  artifacts are unavailable; local outputs are provisional and protected from overwriting.
 - [ ] M1.3 [H] Completeness audit. Script `scripts/make_audit_sample.py`: draw 60 random 5×5 km
   windows inside test+val blocks, stratified by region. Export a QGIS project (labels v1 + S2
   composite + a freely viewable high-res basemap, used for inspection only) and a CSV form
@@ -28,6 +31,9 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
   test blocks). Download the KIT RADAR manual labels for T-indep.
 
 ## M2: Imagery pipeline
+- Pilot progress 2026-11-06: one actual ten-band STAC scene window acquired and aligned to real
+  labels (98.93% valid). It is single-scene exploratory QA, not the reference median/composite or
+  the 50-chip backend benchmark. See `docs/VALIDATION_REPORT.md`.
 - [ ] M2.1 Backend benchmark: (a) Google Earth Engine `computePixels` with server-side
   compositing (needs [H] a non-commercial GEE project), (b) STAC (Planetary Computer / Earth
   Search) + odc-stac windowed reads. Time 50 chips each.
@@ -44,6 +50,9 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
   `runs/qa/` look right.
 
 ## M3: Chip dataset
+- Pilot progress 2026-11-06: 16 real-label masks (4 positive / 12 candidate negatives), actual
+  2,560 m whole-footprint buffer, hard/fractional rasterization, nested draft profiles and input/
+  source/output hashes implemented. The full train-ready imagery dataset is not complete.
 - [ ] M3.1 Chip sampler: positives (any positive pixel), negatives stratified by
   WorldCover/CORINE at 1:3 (the 1:1 subset is nested), border-buffer filter, cross-split polygons
   masked to 255. Fixed, hashed chip list per split.

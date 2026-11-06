@@ -57,6 +57,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = ["integration: requires real source data or generated geographic artifacts"]
 
 [tool.ruff]
 line-length = 120

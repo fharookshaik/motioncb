@@ -93,6 +93,7 @@ def _labels_path():
     return resolve(d["outputs"]["labels"].format(label_version=d["label_version"]))
 
 
+@pytest.mark.integration
 @pytest.mark.skipif(not _labels_path().exists(), reason="run `make labels` first")
 def test_real_labels_invariants():
     g = gpd.read_file(_labels_path(), layer="labels")
@@ -109,6 +110,7 @@ def _split_paths():
         s["outputs"]["report"].format(split_version=v))
 
 
+@pytest.mark.integration
 @pytest.mark.skipif(not _split_paths()[0].exists(), reason="run `make splits` first")
 def test_real_splits_invariants():
     assign_csv, report_json = _split_paths()
