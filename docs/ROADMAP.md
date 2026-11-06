@@ -14,7 +14,7 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
 ## M1: Labels and splits
 - [x] M1.1 Label curation (`make labels`) → label v1. Done 2026-11-03: 9,219 positive / 1,765 ignore.
 - [x] M1.2 Block splits (`make splits`) → split s1. Done 2026-11-03: worst deviation 2.2%.
-- [ ] M1.3 [H] Completeness audit. Script `scripts/make_audit_sample.py`: draw 60 random 5×5 km
+- [x] M1.3 [H] Completeness audit. Script `scripts/make_audit_sample.py`: draw 60 random 5×5 km
   windows inside test+val blocks, stratified by region. Export a QGIS project (labels v1 + S2
   composite + a freely viewable high-res basemap, used for inspection only) and a CSV form
   (window_id, missing_pv_count, notes). Fharook fills it in.

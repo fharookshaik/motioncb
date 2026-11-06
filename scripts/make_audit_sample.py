@@ -1,10 +1,12 @@
-"""M1.3 completeness audit: draw 60 random 5x5 km windows inside val+test blocks, stratified by region.
+"""M1.3 completeness audit: draw 60 windows centred on positive labelled farms in val+test blocks, stratified by region.
+
+Windows are anchored on labelled polygons, so the omission rate is conditional on a labelled farm being in the
+window. Only German polygons are used (outside_germany_flag excluded). Polygons crossing a split border are excluded
+so every window lies fully inside its own block.
 
 Outputs (runs/audit_m1_3/, not committed):
-  windows.gpkg    EPSG:3035 window polygons for the QGIS project (labels v1 + S2 composite + basemap)
+  windows.gpkg    EPSG:3035 window polygons for the QGIS project (labels v1 + basemap)
   audit_form.csv  window_id, missing_pv_count, notes; filled in by Fharook
-
-No land mask yet (M2). Windows over water or forest are expected; record them in notes.
 
 Usage:
     uv run python scripts/make_audit_sample.py --config configs/splits.yaml
@@ -23,31 +25,51 @@ from solarde.config import load_yaml, resolve
 WINDOW_M = 5000
 N_PER_REGION = 15
 SEED = 20261106
+LABELS_PATH = "data/interim/labels_v1.gpkg"
 OUT_DIR = "runs/audit_m1_3"
 
 
-def sample_windows(blocks: gpd.GeoDataFrame, n_per_region: int, seed: int) -> gpd.GeoDataFrame:
-    """Pick n_per_region distinct val/test blocks per region; place one 5 km window at a random offset in each."""
+def _window_around(poly, blk, size: float, rng: np.random.Generator):
+    """Random size x size window inside blk that fully contains poly. None if no such window fits."""
+    pminx, pminy, pmaxx, pmaxy = poly.bounds
+    bminx, bminy, bmaxx, bmaxy = blk.bounds
+    xlo, xhi = max(bminx, pmaxx - size), min(bmaxx - size, pminx)
+    ylo, yhi = max(bminy, pmaxy - size), min(bmaxy - size, pminy)
+    if xlo > xhi or ylo > yhi:
+        return None
+    x0, y0 = rng.uniform(xlo, xhi), rng.uniform(ylo, yhi)
+    return box(x0, y0, x0 + size, y0 + size)
+
+
+def sample_windows(labels: gpd.GeoDataFrame, blocks: gpd.GeoDataFrame, n_per_region: int, seed: int,
+                   size: float = WINDOW_M) -> gpd.GeoDataFrame:
+    """One window per sampled block, containing a positive German label from a val/test block of that region."""
     rng = np.random.default_rng(seed)
-    pool = blocks[blocks["split"].isin(["val", "test"])]
+    bidx = blocks.set_index("block_id")
+    ok = labels["label_status"].eq("positive") & ~labels["outside_germany_flag"] & ~labels["crosses_split_border"]
+    pool = labels[ok].copy()
+    pool["split"] = pool["block_id"].map(bidx["split"])
+    pool["region"] = pool["block_id"].map(bidx["region"])
+    pool = pool[pool["split"].isin(["val", "test"])]
+    regions = sorted(blocks.loc[blocks["split"].isin(["val", "test"]), "region"].unique())
     rows = []
-    for reg in sorted(pool["region"].unique()):
+    for reg in regions:
         cand = pool[pool["region"] == reg]
-        if len(cand) < n_per_region:
-            raise ValueError(f"region {reg}: {len(cand)} val/test blocks, need {n_per_region}")
-        for pos in rng.choice(len(cand), size=n_per_region, replace=False):
-            blk = cand.iloc[pos]
-            minx, miny, maxx, maxy = blk.geometry.bounds
-            x0 = minx + rng.uniform(0, (maxx - minx) - WINDOW_M)
-            y0 = miny + rng.uniform(0, (maxy - miny) - WINDOW_M)
-            rows.append(
-                {
-                    "block_id": blk["block_id"],
-                    "split": blk["split"],
-                    "region": reg,
-                    "geometry": box(x0, y0, x0 + WINDOW_M, y0 + WINDOW_M),
-                }
-            )
+        picked = 0
+        for bid in rng.permutation(cand["block_id"].unique()):
+            if picked == n_per_region:
+                break
+            polys = cand[cand["block_id"] == bid]
+            for pos in rng.permutation(len(polys)):
+                row = polys.iloc[pos]
+                win = _window_around(row.geometry, bidx.geometry.loc[bid], size, rng)
+                if win is not None:
+                    rows.append({"block_id": bid, "area_id": row["area_id"], "split": row["split"],
+                                 "region": reg, "geometry": win})
+                    picked += 1
+                    break
+        if picked < n_per_region:
+            raise ValueError(f"region {reg}: only {picked} usable blocks, need {n_per_region}")
     gdf = gpd.GeoDataFrame(rows, geometry="geometry", crs=blocks.crs)
     gdf = gdf.iloc[rng.permutation(len(gdf))].reset_index(drop=True)
     gdf.insert(0, "window_id", [f"W{i + 1:02d}" for i in range(len(gdf))])
@@ -59,9 +81,15 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--config", default="configs/splits.yaml")
     args = ap.parse_args(argv)
     cfg = load_yaml(args.config)
-    blocks_path = resolve(cfg["outputs"]["blocks"].format(split_version=cfg["split_version"]))
-    blocks = gpd.read_file(blocks_path, layer="blocks")
-    win = sample_windows(blocks, N_PER_REGION, SEED)
+    v = cfg["split_version"]
+    blocks = gpd.read_file(resolve(cfg["outputs"]["blocks"].format(split_version=v)), layer="blocks")
+    polys = pd.read_csv(resolve(cfg["outputs"]["polygon_assignment"].format(split_version=v)))
+    labels = gpd.read_file(resolve(LABELS_PATH), layer="labels")
+    labels = labels.merge(polys[["area_id", "block_id", "crosses_split_border"]], on="area_id",
+                          how="left", validate="one_to_one")
+    if labels["block_id"].isna().any():
+        raise ValueError("labels without a block assignment")
+    win = sample_windows(labels, blocks, N_PER_REGION, SEED)
     out = resolve(OUT_DIR)
     out.mkdir(parents=True, exist_ok=True)
     win.to_file(out / "windows.gpkg", driver="GPKG", layer="windows")
