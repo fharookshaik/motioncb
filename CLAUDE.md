@@ -51,6 +51,7 @@ make test       # pytest via uv run
 make check      # tests + ruff + disk report before every commit
 make disk       # data/runs usage and available disk space
 make audit-sample  # M1.3 completeness-audit windows -> runs/audit_m1_3/ (windows.gpkg, audit_form.csv)
+make tnew       # M1.6 T-new test polygons -> data/processed/tnew_s1.csv (needs V20250101 gpkg in data/raw)
 
 Use native Windows PowerShell only. Do not require WSL or Bash. Run Python via uv run.
 ```
