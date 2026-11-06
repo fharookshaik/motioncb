@@ -7,9 +7,9 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
 - [x] M0.1 Create the Python 3.11 uv environment from `pyproject.toml` and `uv.lock`. Install torch with the CUDA build matching
   the driver (`nvidia-smi`). Use Windows PowerShell for all project commands; do not require WSL or Bash.
   *Acceptance:* `uv run python -c "import torch; print(torch.cuda.is_available())"` prints True. `make test` passes.
-- [ ] M0.2 GPU probe script `scripts/gpu_probe.py`: VRAM, bf16 support, max batch for U-Net-R50 at
+- [x] M0.2 GPU probe script `scripts/gpu_probe.py`: VRAM, bf16 support, max batch for U-Net-R50 at
   256 px with 10 bands. *Acceptance:* results appended to docs/decisions.md.
-- [ ] M0.3 `git init`, first commit, pre-commit hook running `make check`.
+- [x] M0.3 `git init`, first commit, pre-commit hook running `make check`.
 
 ## M1: Labels and splits
 - [x] M1.1 Label curation (`make labels`) → label v1. Done 2026-11-03: 9,219 positive / 1,765 ignore.

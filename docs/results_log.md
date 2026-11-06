@@ -10,3 +10,8 @@ Format:
 - recall by size bin: ...
 - note: <one line>
 ```
+
+## 2026-11-05 | M0.2 GPU probe
+- GPU: RTX 2000 Ada Generation Laptop GPU; VRAM: 8,585,216,000 bytes; bf16 supported.
+- Synthetic U-Net ResNet-50 training step, 10 bands, 256 px, bf16, AdamW: batch 16 fits (cap 16); peak allocated 1,809,407,488 bytes.
+- Random encoder weights; synthetic data; no claims about full training throughput.

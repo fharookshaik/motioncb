@@ -1,3 +1,5 @@
+.claude/worktrees/
+
 # data and experiment outputs stay out of git (hashes are recorded instead)
 data/raw/
 data/interim/

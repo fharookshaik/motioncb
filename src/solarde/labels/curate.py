@@ -13,7 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import geopandas as gpd
 import numpy as np
@@ -120,11 +120,11 @@ def build_report(gdf: gpd.GeoDataFrame, cfg: dict) -> dict:
     pos = gdf[gdf.label_status == STATUS_POSITIVE]
     return {
         "label_version": cfg["label_version"],
-        "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "raw_polygons_sha256": _sha256(resolve(cfg["raw"]["polygons"])),
         "raw_records_sha256": _sha256(resolve(cfg["raw"]["records"])),
-        "n_polygons": int(len(gdf)),
-        "n_positive": int(len(pos)),
+        "n_polygons": len(gdf),
+        "n_positive": len(pos),
         "n_ignore": int((gdf.label_status == STATUS_IGNORE).sum()),
         "positive_ha": round(float(pos.ha.sum()), 1),
         "n_positive_large_scale": int(pos.large_scale.sum()),

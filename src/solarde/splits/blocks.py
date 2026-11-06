@@ -142,7 +142,7 @@ def build(labels_gdf: gpd.GeoDataFrame, cfg: dict) -> tuple[gpd.GeoDataFrame, pd
     report = {
         "split_version": cfg["split_version"],
         "seed": cfg["seed"],
-        "n_blocks_total": int(len(blocks)),
+        "n_blocks_total": len(blocks),
         "n_blocks_with_positive_pv": int((blocks.pv_ha > 0).sum()),
         "worst_relative_deviation_train_val_test": round(worst, 4),
         "worst_relative_deviation_cv": round(worst_cv, 4),
