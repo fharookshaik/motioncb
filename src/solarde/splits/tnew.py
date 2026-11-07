@@ -126,6 +126,7 @@ def main() -> None:
         "counts": counts,
         "tnew_csv_sha256": sha256(out_csv),
         "polygon_split_sha256": sha256(resolve(cfg["polygon_split"])),
+        "labels_sha256": sha256(resolve(cfg["labels"])),
         **provenance(resolve(args.config)),
     }
     resolve(cfg["out_report"]).write_text(json.dumps(report, indent=2), encoding="utf-8")

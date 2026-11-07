@@ -28,7 +28,7 @@ reading and commenting. If they differ, this file plus `docs/decisions.md` win.
 - Median distance to the nearest neighbouring farm: 627 m (46.7% within 500 m), so splits must be
   spatial blocks.
 - 3 polygons lie in Denmark (area_id 10405, 10416, 10435): **kept**, flagged.
-- Earlier release V20250101: 9,770 polygons. The difference gives test set T-new.
+- T-new compares V20260203 against the approved V20240104 substitute by geometry (best IoU <0.5 and nearest distance ≥50 m). It measures release additions, not independently verified new construction.
 
 ## 3. Label protocol (label v1, `configs/data.yaml`)
 
@@ -39,7 +39,8 @@ Result: 9,219 positive (33,649 ha; 5,766 ≥1 ha) and 1,765 ignore.
 
 Rooftop PV is not labelled: the task is ground-mounted PV. A completeness audit (60 windows of
 5×5 km, visual inspection on freely viewable high-res basemaps, used for inspection only)
-estimates the label omission rate, which caps achievable precision.
+estimates omission near known labelled farms, not landscape-wide omission or a precision ceiling.
+The historical label-anchored sample is retained after split regeneration; it is not a current held-out-only sample.
 
 ## 4. Imagery (no DOP)
 
@@ -59,6 +60,9 @@ never stored. Chips are 256 px in their native UTM grid.
 U-Net + ResNet-50 (SSL4EO-S12 MoCo, all S2 bands), BCE+Dice, AdamW + cosine, fixed step budget,
 bf16, auto batch ≤16 with accumulation to 16, flips/rot90/mild brightness, threshold 0.5,
 checkpoint chosen by val object-F1 (≥1 ha). Every arm gets the same HPO sweep (3 LR × 2 WD).
+Reference negatives:positives remains 1:1. Approved by Fharook on 2026-11-07: collect a deterministic
+1:3 candidate pool with the reference 1:1 subset nested inside it. The 1:3 sampling experiment uses
+the same positives and reference negatives plus additional negatives; collecting the pool does not change the reference.
 
 ## 6. Ablation axes (`configs/ablations/registry.yaml`)
 
@@ -84,7 +88,7 @@ Budget (pre-pilot estimate, 8 GB GPU): Tier 1 ≈ 37 arms × 3 seeds ≈ 300 GPU
   (North, West, South, East; worst deviation 1.8%). A 2.56 km border buffer. 132 polygons that cross a split border are masked outside
   their own block. 5-fold block CV is used for the final check only.
 - Test sets: T-main (held-out blocks), T-region (leave-one-region-out), T-new (V20260203 minus
-  V20250101), T-indep (KIT RADAR manual labels, Hesse/NRW), T-wall (false positives per 1,000 km²).
+  V20240104 by geometric matching; release additions, not verified new builds), T-indep (KIT RADAR manual labels, Hesse/NRW), T-wall (false positives per 1,000 km²).
 - Primary endpoints: object F1 for farms ≥1 ha (detected = ≥10% covered) and accumulated PV IoU.
   Secondary: recall per size bin and mounting type, delineation rate (IoU ≥0.5), boundary F1 (1 px),
   area error, false positives per 1,000 km², cost.
@@ -106,7 +110,7 @@ explicitly as a limitation).
 
 ## 10. Sources
 
-- Manske (2026), V20260203: https://zenodo.org/records/20716459 · V20250101: https://zenodo.org/records/16942382
+- Manske (2026), V20260203: https://zenodo.org/records/20716459 · approved V20240104 comparator: https://zenodo.org/records/14627853
 - Manske et al. (2022), Data 7(9):128: https://doi.org/10.3390/data7090128
 - KIT RADAR PV reference labels: https://b2find.eudat.eu/dataset/a788c3e6-6a4a-529e-97cc-92829fac155d
 - GEO-Bench-2: https://arxiv.org/html/2511.15658v2 · Prithvi-EO-2.0: https://arxiv.org/html/2412.02732v3

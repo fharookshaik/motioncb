@@ -24,6 +24,7 @@ import pandas as pd
 from shapely.geometry import box
 
 from solarde.config import load_yaml, resolve
+from solarde.splits.tnew import provenance, sha256
 
 
 def make_grid(bbox_wgs84: list[float], size_m: float, crs: int = 3035) -> gpd.GeoDataFrame:
@@ -123,6 +124,9 @@ def build(labels_gdf: gpd.GeoDataFrame, cfg: dict) -> tuple[gpd.GeoDataFrame, pd
     cent["geometry"] = labels_gdf.geometry.centroid
     j = gpd.sjoin(cent[["area_id", "ha", "large_scale", "label_status", "geometry"]], grid, predicate="within")
     j = j.drop(columns="index_right")
+    if (not labels_gdf.area_id.is_unique or not j.area_id.is_unique
+            or set(j.area_id) != set(labels_gdf.area_id)):
+        raise ValueError("Every polygon must have exactly one centroid inside a grid block; check grid bounds/boundaries.")
 
     pos = j[j.label_status == "positive"]
     stats = pos.groupby("block_id").agg(
@@ -188,20 +192,30 @@ def main(argv: list[str] | None = None) -> None:
     cfg = load_yaml(args.config)
     dcfg = load_yaml(args.data_config)
 
+    outputs = {key: resolve(path.format(split_version=cfg["split_version"])) for key, path in cfg["outputs"].items()}
+    if any(path.exists() for path in outputs.values()):
+        raise SystemExit("Refusing to replace existing split files. An approved change needs a new split version.")
+
     labels_path = resolve(dcfg["outputs"]["labels"].format(label_version=dcfg["label_version"]))
     labels_gdf = gpd.read_file(labels_path, layer="labels")
     blocks, poly, report = build(labels_gdf, cfg)
-    report["label_version"] = dcfg["label_version"]
-
-    sv = cfg["split_version"]
-    out_b = resolve(cfg["outputs"]["blocks"].format(split_version=sv))
-    out_b.parent.mkdir(parents=True, exist_ok=True)
-    blocks.to_file(out_b, driver="GPKG", layer="blocks")
-    poly.to_csv(resolve(cfg["outputs"]["polygon_assignment"].format(split_version=sv)), index=False)
-    resolve(cfg["outputs"]["report"].format(split_version=sv)).write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(json.dumps(report, indent=2))
     if not report["accepted"]:
-        raise SystemExit("Split balance outside tolerance: raise `restarts` or review block size.")
+        raise SystemExit("Split balance outside tolerance; no outputs written. Raise `restarts` or review block size.")
+    report.update({
+        "label_version": dcfg["label_version"],
+        "labels_sha256": sha256(labels_path),
+        "region_source_sha256": sha256(resolve(cfg["region_source"]["path"])),
+        "data_config_sha256": sha256(resolve(args.data_config)),
+        **provenance(resolve(args.config)),
+    })
+    for path in outputs.values():
+        path.parent.mkdir(parents=True, exist_ok=True)
+    blocks.to_file(outputs["blocks"], driver="GPKG", layer="blocks")
+    poly.to_csv(outputs["polygon_assignment"], index=False)
+    report["blocks_sha256"] = sha256(outputs["blocks"])
+    report["polygon_assignment_sha256"] = sha256(outputs["polygon_assignment"])
+    outputs["report"].write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":

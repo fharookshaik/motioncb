@@ -13,12 +13,16 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
 
 ## M1: Labels and splits
 - [x] M1.1 Label curation (`make labels`) → label v1. Done 2026-11-03: 9,219 positive / 1,765 ignore.
-- [x] M1.2 Block splits (`make splits`) → split s1. Done 2026-11-03: worst deviation 2.2%.
+- [x] M1.2 Block splits (`make splits`) → split s1. Current Land-group version (2026-11-06): worst deviation 1.8%; 132 crossing polygons. Earlier quadrant version archived.
 - [x] M1.3 [H] Completeness audit. Script `scripts/make_audit_sample.py`: draw 60 random 5×5 km
   windows inside test+val blocks, stratified by region. Export a QGIS project (labels v1 + S2
   composite + a freely viewable high-res basemap, used for inspection only) and a CSV form
   (window_id, missing_pv_count, notes). Fharook fills it in.
   *Acceptance:* omission rate with a 95% CI written to docs/results_log.md.
+  Numerical result reproduced 2026-11-07 via `make audit-summary`; denominator/exclusion approval
+  remains pending Fharook (decisions.md). Retained label-anchored sample, not landscape-wide omission.
+- [ ] M1.3 approval [H]: confirm fully-contained-farm denominator and outside-window exclusions.
+  No redraw or new visual workload; retain the approved historical sample.
 - [x] M1.4 Replace the region proxy (lon 10.5 / lat 51.0) with BKG VG250 Länder groups if it
   changes assignments materially. Otherwise keep it and document why. Must be done **before
   M6**, because the split freezes then.
@@ -35,6 +39,15 @@ checked. `[H]` marks a task that needs Fharook. Prepare everything around it, th
   Done 2026-11-06: V20250101 is restricted and no access was granted, so T-new uses the approved
   substitute V20240104 (Zenodo 14627853) with geometric matching. 173 T-new polygons. T-indep: 15 of 84
   KIT tiles usable. See decisions.md and results_log.md.
+
+## M0/M1 hardening (2026-11-07)
+- [x] Isolate bundled geospatial projection data from inherited PostGIS settings; CRS/reprojection smoke test.
+- [x] Refuse existing split/audit outputs; reject unbalanced candidates before writing; validate complete assignments.
+- [x] Read-only audit summary with seeded bootstrap, explicit exclusions and input hashes.
+- [x] Strengthen producer provenance and boundary/temporal/integrity tests; preserve current generated artifacts.
+- [x] [H] Approved by Fharook 2026-11-07: collect a deterministic 1:3 candidate pool with a nested
+  1:1 reference subset. Reference remains 1:1; the 1:3 sampling experiment reuses the same positives
+  and reference negatives plus the additional negatives. Collection approval recorded; no export started.
 
 ## M2: Imagery pipeline
 - [ ] M2.1 Backend benchmark: (a) Google Earth Engine `computePixels` with server-side

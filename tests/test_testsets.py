@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from shapely.geometry import box
 
-from solarde.labels.kit_indep import TILE_RE, to_task_mask
+from solarde.labels.kit_indep import TILE_RE, describe_tile, to_task_mask
 from solarde.splits.tnew import best_iou, nearest_distance, new_polygon_ids, select_tnew
 
 
@@ -63,3 +63,23 @@ def test_nearest_distance_zero_on_overlap_and_gap_otherwise():
 def test_tile_name_pattern():
     m = TILE_RE.match("label_manual_nrw_0292_5600_2023.tif")
     assert (m["region"], m["year"]) == ("nrw", "2023")
+
+
+def test_kit_source_hash_detects_rearranged_pixels(tmp_path):
+    import rasterio
+    from pyproj import Transformer
+
+    path = tmp_path / "label_manual_nrw_0292_5600_2023.tif"
+    bounds = box(300000, 5600000, 300002, 5600002)
+    blocks = gpd.GeoDataFrame({"split": ["test"]}, geometry=[bounds], crs=25832).to_crs(3035)
+    labels = gpd.GeoDataFrame({"label_status": ["positive"], "commission_last": ["2020-01-01"]},
+                              geometry=[bounds], crs=25832)
+    transformer = Transformer.from_crs(25832, 3035, always_xy=True)
+    results = []
+    for values in (np.array([[0, 1], [2, 2]], dtype="uint8"), np.array([[2, 2], [0, 1]], dtype="uint8")):
+        with rasterio.open(path, "w", driver="GTiff", height=2, width=2, count=1, dtype="uint8",
+                           crs="EPSG:25832", transform=rasterio.Affine(1, 0, 300000, 0, -1, 5600002)) as dst:
+            dst.write(values, 1)
+        results.append(describe_tile(path, blocks, labels, transformer))
+    assert results[0]["n_ground_px"] == results[1]["n_ground_px"] == 2
+    assert results[0]["source_sha256"] != results[1]["source_sha256"]

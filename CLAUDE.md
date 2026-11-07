@@ -50,7 +50,8 @@ make splits     # 20 km block splits -> data/processed/splits_s1_*
 make test       # pytest via uv run
 make check      # tests + ruff + disk report before every commit
 make disk       # data/runs usage and available disk space
-make audit-sample  # M1.3 completeness-audit windows -> runs/audit_m1_3/ (windows.gpkg, audit_form.csv)
+make audit-sample  # New M1.3 sample only; refuses existing audit outputs
+make audit-summary # Read-only retained M1.3 counts, conditional omission and seeded bootstrap CI
 make testsets   # T-new (V20260203 vs V20240104, geometry match) and T-indep (KIT RADAR) -> data/processed/
 
 Use native Windows PowerShell only. Do not require WSL or Bash. Run Python via uv run.

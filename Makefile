@@ -1,19 +1,23 @@
 SHELL := powershell.exe
 .SHELLFLAGS := -NoLogo -NoProfile -NonInteractive -Command
 
-.PHONY: setup labels splits audit-sample testsets test lint check disk
+.PHONY: setup labels splits audit-sample audit-summary testsets test lint check disk
 
 setup:
-	uv sync --extra dev --extra geo --extra train --extra imagery
+	uv sync --locked --extra dev --extra geo --extra train --extra imagery
+	git config --local core.hooksPath .githooks
 
 labels:
 	uv run python -m solarde.labels.curate --config configs/data.yaml
 
 splits:
-	if ((Test-Path 'data/processed/splits_s1_blocks.gpkg') -and ((Test-Path 'runs/registry.csv') -or (Test-Path 'runs/test_access.log') -or (Get-ChildItem 'runs' -Directory -ErrorAction SilentlyContinue | Where-Object { $$_.Name -ne 'audit_m1_3' } | Select-Object -First 1))) { Write-Error 'Refusing: training runs exist and split s1 is frozen (CLAUDE.md invariant 1).'; exit 1 }; uv run python -m solarde.splits.blocks --config configs/splits.yaml --data-config configs/data.yaml
+	uv run python -m solarde.splits.blocks --config configs/splits.yaml --data-config configs/data.yaml
 
 audit-sample:
 	uv run python scripts/make_audit_sample.py --config configs/splits.yaml
+
+audit-summary:
+	uv run python scripts/make_audit_sample.py --config configs/splits.yaml --summary
 
 testsets:
 	uv run python -m solarde.splits.tnew --config configs/testsets.yaml
@@ -23,7 +27,7 @@ test:
 	uv run pytest -q
 
 lint:
-	uv run ruff check src tests
+	uv run ruff check src tests scripts
 
 check: test lint disk
 

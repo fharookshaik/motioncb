@@ -42,3 +42,10 @@ Format:
 - T-new commissioning: 140 of 173 by `commission_last` in 2024.
 - T-indep (KIT RADAR manual labels, CC BY-SA 4.0): 15 of 84 tiles usable (11 NRW, 4 Hesse); 1,759,716 ground-PV pixels (about 7.0 ha); six label-v1 positives touch usable tiles, none commissioned after the tile year.
 - note: data-only result. No model, no test-split metric, no `make eval-test`, so `runs/test_access.log` is not written.
+
+## 2026-11-07 | M0/M1 hardening verification | label v1 | split s1
+- `make audit-summary`: 60 windows/unique original blocks, 138 fully-contained positives, 2 in-window misses; 2/140 = 1.428571%; 95% CI [0, 3.623188%], 10,000 whole-window/block bootstrap resamples, RNG seed 20261106. Conditional label-anchored omission only; denominator/exclusion approval remains pending Fharook.
+- Audit input SHA-256: windows `1ead27f4ffaaaba1fca83c184b7e6e6790a8c8e22c5a83216b859fa672262c5b`; form `9d2c32405196454ecc5fff6c78cf87117e61b0bf10f474064e545fd0b577a379`; labels `d0717aa76067d6d2d788a16e78262c7814060783954d81da839f50810d019b45`.
+- Current s1 hashes unchanged: blocks `db9d3b50ba3fcf6d4ed5447159d7fdca41a98f8aa1210a465f8cc8f913b03b40`; polygons `cb41f8961f037896e8b0d2da381d2b5ac8abbf10e23d93523bd9a6aba18bfda7`; report `063c3ccb7dd9f69d6a252c100c8a2b521618653e415d72c01fdc22bb250a1b43`.
+- Read-only archive check: all retained audit windows fit their original quadrant blocks and original val/test attributes match; one window per block. No redraw or artifact rebuild. Historical test-set reports remain historical; new provenance fields apply on future builds.
+- Checks: 30 tests pass; ruff covers source, tests and scripts; disk within budget. Rasterio CRS/reprojection smoke test passes with deliberately invalid inherited PostGIS settings. Leakage-auditor found no concrete leakage introduced; results-reviewer checked audit-summary calculation.

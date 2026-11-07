@@ -11,7 +11,7 @@ tnew:
   # An unmatched polygon whose nearest comparator polygon is closer than this is a revised farm, not an addition.
   revised_within_m: 50
   polygon_split: data/processed/splits_s1_polygons.csv
-  # New name: data/processed/tnew_s1_vs_V20240104.csv is a stale area_id-keyed output and is kept untouched.
+  # Replaces the invalid area_id-keyed CSV, deleted with approval; geometry matching is canonical.
   out_csv: data/processed/tnew_s1_vs_V20240104_geomatch.csv
   out_report: data/processed/tnew_s1_vs_V20240104_geomatch_report.json
 

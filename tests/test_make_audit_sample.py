@@ -3,11 +3,12 @@ import sys
 from pathlib import Path
 
 import geopandas as gpd
+import pandas as pd
 import pytest
 from shapely.geometry import box
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from make_audit_sample import WINDOW_M, sample_windows
+from make_audit_sample import WINDOW_M, main, sample_windows, summarise_audit
 
 EXCLUDED_AREAS = {9997, 9998, 9999}
 
@@ -62,3 +63,35 @@ def test_raises_when_region_has_too_few_usable_blocks():
     # 12 val+test blocks per toy region, so 13 cannot be met.
     with pytest.raises(ValueError):
         sample_windows(labels, blocks, n_per_region=13, seed=1)
+
+
+def test_completed_audit_is_never_overwritten(tmp_path):
+    form = tmp_path / "audit_form.csv"
+    form.write_text("completed observations", encoding="utf-8")
+    config = tmp_path / "audit.yaml"
+    config.write_text(f"audit:\n  out_dir: '{tmp_path.as_posix()}'\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match="Refusing to overwrite"):
+        main(["--config", str(config)])
+    assert form.read_text(encoding="utf-8") == "completed observations"
+
+
+def test_audit_summary_and_validation():
+    windows = gpd.GeoDataFrame({"window_id": ["W01", "W02"], "block_id": ["B1", "B2"]},
+                               geometry=[box(0, 0, 10, 10), box(20, 0, 30, 10)], crs=3035)
+    labels = gpd.GeoDataFrame({"label_status": ["positive", "positive", "ignore", "positive"]},
+                              geometry=[box(1, 1, 2, 2), box(9, 1, 11, 2), box(3, 3, 4, 4), box(21, 1, 22, 2)],
+                              crs=3035)
+    form = pd.DataFrame({"window_id": ["W02", "W01"], "missing_pv_count": [2, 1]})
+    result = summarise_audit(windows, labels, form, {"W02": 2}, seed=1, resamples=100)
+    assert result["labelled_fully_contained"] == 2
+    assert result["missed_inside"] == 1
+    assert result["omission_rate"] == 1 / 3
+    assert result == summarise_audit(windows, labels, form, {"W02": 2}, seed=1, resamples=100)
+
+
+def test_audit_rejects_incomplete_form():
+    labels, blocks = _toy_inputs()
+    windows = sample_windows(labels, blocks, n_per_region=1, seed=1)
+    form = pd.DataFrame({"window_id": windows.window_id, "missing_pv_count": [0, 0, None, 0]})
+    with pytest.raises(ValueError, match="non-negative integer"):
+        summarise_audit(windows, labels, form, {}, seed=1, resamples=10)

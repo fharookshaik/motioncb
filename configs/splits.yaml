@@ -10,7 +10,7 @@ max_rel_deviation: 0.05      # acceptance: each split within +-5% (relative) of 
 
 # Germany bounding box (WGS84) used to lay the grid; blocks are later
 # restricted to land/Germany by the imagery pipeline (M2).
-grid_bbox_wgs84: [5.5, 47.2, 15.5, 57.4]   # extended north to cover the 2 cross-border polygons
+grid_bbox_wgs84: [5.5, 47.2, 15.5, 57.4]   # includes the three retained Danish sites
 
 # Region groups for stratified balancing: BKG VG250 Laender (AGS codes), ROADMAP M1.4.
 # Hamburg, Bremen and Saarland are small; they stay grouped to keep each group balanceable.
@@ -34,3 +34,13 @@ outputs:
   blocks: data/processed/splits_{split_version}_blocks.gpkg
   polygon_assignment: data/processed/splits_{split_version}_polygons.csv
   report: data/processed/splits_{split_version}_report.json
+
+# Retained M1.3 sample uses the archived quadrant draw, not a redraw on current s1.
+audit:
+  out_dir: runs/audit_m1_3
+  windows: runs/audit_m1_3/windows.gpkg
+  form: runs/audit_m1_3/audit_form.csv
+  labels: data/interim/labels_v1.gpkg
+  excluded_outside_counts: {W40: 2}  # CSV notes explicitly locate both farms outside the window
+  seed: 20261106
+  resamples: 10000

@@ -11,6 +11,7 @@ from shapely.geometry import MultiPolygon, box
 
 from solarde.config import load_yaml, resolve
 from solarde.labels.curate import curate
+from solarde.splits import blocks as split_blocks
 from solarde.splits.blocks import _greedy, balance_score
 
 CFG = {
@@ -114,5 +115,73 @@ def test_real_splits_invariants():
     assign_csv, report_json = _split_paths()
     a = pd.read_csv(assign_csv)
     assert a.area_id.is_unique, "each polygon must belong to exactly one block/split"
+    assert set(a.area_id) == set(gpd.read_file(_labels_path(), columns=["area_id"]).area_id)
+    assert not a[["block_id", "split", "cv_fold", "crosses_split_border"]].isna().any().any()
     rep = json.loads(report_json.read_text())
     assert rep["accepted"]
+
+
+@pytest.mark.parametrize("column,date,ignored", [
+    ("commissioning_date", "2024-12-31", False),
+    ("commissioning_date", "2025-01-01", True),
+    ("decommissioning_date", "2025-09-30", True),
+    ("decommissioning_date", "2025-10-01", False),
+])
+def test_temporal_boundaries(synthetic, column, date, ignored):
+    polys, records = synthetic
+    records = records.copy()
+    records.loc[records.area_id.eq(1), column] = pd.Timestamp(date)
+    out = curate(polys, records, CFG).set_index("area_id")
+    assert (out.loc[1, "label_status"] == "ignore") == ignored
+
+
+def _toy_split(monkeypatch, centroid_x=5):
+    grid = gpd.GeoDataFrame({"block_id": ["left", "right"]},
+                            geometry=[box(0, 0, 10, 10), box(10, 0, 20, 10)], crs=3035)
+    labels = gpd.GeoDataFrame({"area_id": [1, 2], "ha": [1.0, 0.5], "large_scale": [True, False],
+                              "label_status": ["positive", "positive"]},
+                              geometry=[box(centroid_x - 6, 2, centroid_x + 6, 4), box(12, 2, 14, 4)], crs=3035)
+    monkeypatch.setattr(split_blocks, "make_grid", lambda *args: grid)
+    monkeypatch.setattr(split_blocks, "land_group_of", lambda *args: pd.Series(["North", "North"]))
+    monkeypatch.setattr(split_blocks, "assign_blocks", lambda *args: (pd.Series(["train", "test"]), 0.0))
+    cfg = {"grid_bbox_wgs84": [], "block_size_m": 10, "region_source": {},
+           "fractions": {"train": 0.5, "test": 0.5}, "restarts": 1, "seed": 1, "cv_folds": 2,
+           "split_version": "toy", "max_rel_deviation": 0.05}
+    return labels, cfg
+
+
+def test_cross_split_polygon_flag(monkeypatch):
+    labels, cfg = _toy_split(monkeypatch)
+    _, assignments, _ = split_blocks.build(labels, cfg)
+    assert assignments.area_id.tolist() == [1, 2]
+    assert assignments.block_id.tolist() == ["left", "right"]
+    assert assignments.crosses_split_border.tolist() == [True, False]
+
+
+@pytest.mark.parametrize("centroid_x", [10, 30])
+def test_unassigned_boundary_or_outside_centroid_fails(monkeypatch, centroid_x):
+    labels, cfg = _toy_split(monkeypatch, centroid_x)
+    with pytest.raises(ValueError, match="exactly one centroid"):
+        split_blocks.build(labels, cfg)
+
+
+def test_split_refuses_existing_files_before_reading_labels(tmp_path, monkeypatch):
+    out = tmp_path / "blocks.gpkg"
+    out.write_bytes(b"retained split")
+    cfg = {"split_version": "toy", "outputs": {"blocks": str(out)}}
+    monkeypatch.setattr(split_blocks, "load_yaml", lambda path: cfg)
+    with pytest.raises(SystemExit, match="Refusing to replace"):
+        split_blocks.main(["--config", "unused", "--data-config", "unused"])
+    assert out.read_bytes() == b"retained split"
+
+
+def test_rejected_split_writes_nothing(tmp_path, monkeypatch):
+    cfg = {"split_version": "toy", "outputs": {key: str(tmp_path / key)
+           for key in ("blocks", "polygon_assignment", "report")}}
+    dcfg = {"outputs": {"labels": "unused"}, "label_version": "test"}
+    monkeypatch.setattr(split_blocks, "load_yaml", lambda path: cfg if path == "split" else dcfg)
+    monkeypatch.setattr(split_blocks.gpd, "read_file", lambda *a, **kw: None)
+    monkeypatch.setattr(split_blocks, "build", lambda *a: (None, None, {"accepted": False}))
+    with pytest.raises(SystemExit, match="no outputs written"):
+        split_blocks.main(["--config", "split", "--data-config", "data"])
+    assert not list(tmp_path.iterdir())

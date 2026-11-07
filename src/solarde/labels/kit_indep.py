@@ -63,6 +63,7 @@ def describe_tile(path: Path, blocks: gpd.GeoDataFrame, labels: gpd.GeoDataFrame
     commissioned = pd.to_datetime(touching["commission_last"], errors="coerce").dt.year
     return {
         "tile": path.name,
+        "source_sha256": sha256(path),
         "region": m["region"],
         "year": year,
         "n_px": int(values.size),
